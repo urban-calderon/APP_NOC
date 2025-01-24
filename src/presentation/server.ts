@@ -1,10 +1,14 @@
+import { MongoLogDatasource } from '../infraestructure/datasources/mongo-log.datasource';
+import { CheckService } from '../domain/use-cases/checks/check-service';
 import { SendEmailLogs } from '../domain/use-cases/email/send-email-logs';
 import { FileSystemDatasource } from '../infraestructure/datasources/file-system.datasource';
 import { LogRepositoryImpl } from '../infraestructure/repositories/log.repository.impl';
+import { CronService } from './cron/cron-service';
 import { EmailService } from './email/email-service';
 
-const fileSystemLogRepository = new LogRepositoryImpl(
-    new FileSystemDatasource()
+const logRepository = new LogRepositoryImpl(
+    //new FileSystemDatasource()
+    new MongoLogDatasource()
 );
 
 const emailService = new EmailService();
@@ -16,10 +20,10 @@ export class Server {
 
         // Enviar email
         // todo: Usamos el repositorio para mandar el email
-        new SendEmailLogs(
+       /*  new SendEmailLogs(
             emailService,
             fileSystemLogRepository
-        ).execute('urbancalderon@outlook.com');
+        ).execute('urbancalderon@outlook.com'); */
         //------------------------------------------
         
         // Ejemplo de enviar email con nodemailer
@@ -38,17 +42,18 @@ export class Server {
         ); */
         
         // Ejecucion del cronjob
-        //CronService.createJob(
-        //    '*/5 * * * * *', 
-        //    () => {
-        //        const url = 'https://google.com'
-        //        new CheckService(
-        //            fileSystemLogRepository,
-        //            () => console.log(`${url} is ok`),
-        //            ( error ) => console.log( error ),
-        //        ).execute(url);
-        //    }
-        //);
+        CronService.createJob(
+            '*/5 * * * * *', 
+            () => {
+                const url = 'https://google.com67777';
+
+                new CheckService(
+                    logRepository,
+                    () => console.log(`${url} is ok`),
+                    ( error ) => console.log( error ),
+                ).execute(url);
+            }
+        );
     }
 
 }
